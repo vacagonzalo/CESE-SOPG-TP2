@@ -103,6 +103,17 @@ const out_t Y = {.inBoard = 1, .inBuffer = 8};
 const out_t W = {.inBoard = 2, .inBuffer = 10};
 const out_t Z = {.inBoard = 3, .inBuffer = 12};
 
+const char NUM_ARGUMENTS = 5;
+
+const char POS_SERIAL_INDX = 1;
+const char MIN_SERIAL_INDX = 1;
+const char MAX_SERIAL_INDX = 21;
+
+const char POS_BAUDRATE = 2;
+
+const char POS_TCPPOR = 3;
+const char POS_IPADDR = 4;
+
 const char FPO = 1;
 const char ACK = 'O';
 const char TGL = 'T';
@@ -121,33 +132,33 @@ int main(int argc, char *argv[])
 	printf("MAI - START\n\r");
 
 	// VERIFICACIÓN DE ARGUMENTOS /////////////////////////////////////////////
-	if (5 != argc)
+	if (NUM_ARGUMENTS != argc)
 	{
 		perror("MAI - INVALID NUMBER OF ARGUMENTS\n\r");
 		exit(EXIT_FAILURE);
 	}
 
-	pnSerial = atoi(argv[1]);
-	if ((pnSerial > 21) || (pnSerial < 0))
+	pnSerial = atoi(argv[POS_SERIAL_INDX]);
+	if ((pnSerial > MAX_SERIAL_INDX) || (pnSerial < MIN_SERIAL_INDX))
 	{
 		perror("MAI - INVALID SERIAL PORT\n\r");
 		exit(EXIT_FAILURE);
 	}
 
-	baudrate = atoi(argv[2]);
+	baudrate = atoi(argv[POS_BAUDRATE]);
 	if (INVALID_BAUD(baudrate))
 	{
 		perror("MAI - INVALID BAUDRATE\n\r");
 		exit(EXIT_FAILURE);
 	}
 
-	pnTCP = atoi(argv[3]);
+	pnTCP = atoi(argv[POS_TCPPOR]);
 	if (pnTCP < 0)
 	{
 		perror("MAI - INVALID TCP PORT\n\r");
 	}
 
-	ipADDR = argv[4];
+	ipADDR = argv[POS_IPADDR];
 	///////////////////////////////////////////////////////////////////////////
 
 	// CONFIGURACIÓN DEL MANEJO DE SEÑALES ////////////////////////////////////
