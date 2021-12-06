@@ -102,6 +102,10 @@ const out_t X = {.inBoard = 0, .inBuffer = 6};
 const out_t Y = {.inBoard = 1, .inBuffer = 8};
 const out_t W = {.inBoard = 2, .inBuffer = 10};
 const out_t Z = {.inBoard = 3, .inBuffer = 12};
+
+const char FPO = 1;
+const char ACK = 'O';
+const char TGL = 'T';
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
@@ -413,7 +417,7 @@ void *taskSERIAL(void *param)
 		status = serial_receive(bufInp, 20);
 		if (-1 != status && 0 != status)
 		{
-			if ('T' == bufInp[1]) // Toggle
+			if (TGL == bufInp[FPO])
 			{
 				printf("SER - %s", bufInp);
 
@@ -446,8 +450,7 @@ void *taskSERIAL(void *param)
 					printf("SER - %s\n\r", frame);
 				}
 			}
-			// Recibe ACK
-			else if ('O' == bufInp[1])
+			else if (ACK == bufInp[FPO])
 			{
 				printf("SER - %s\n\r", bufInp);
 			}
@@ -461,7 +464,7 @@ void *taskSERIAL(void *param)
 				if (outs[i] != lines[i]) // Comparo con el recurso global
 				{
 					outs[i] = lines[i];
-					bufOut[6 + i * 2] = outs[i] + '0'; // Salto las ','
+					bufOut[X.inBuffer + (i * 2)] = outs[i] + '0'; // Salto las ','
 					cflag = 1;
 				}
 				pthread_mutex_unlock(&mutexOuts);
