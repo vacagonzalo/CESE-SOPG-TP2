@@ -33,6 +33,12 @@ int baudrate;
  * 
  */
 int pnTCP;
+
+/**
+ * @brief Dirección IP del servidor
+ * 
+ */
+char *ipADDR;
 ///////////////////////////////////////////////////////////////////////////////
 
 // Recursos globales //////////////////////////////////////////////////////////
@@ -129,6 +135,8 @@ int main(int argc, char *argv[])
 	{
 		perror("MAI - INVALID TCP PORT\n\r");
 	}
+
+	ipADDR = argv[4];
 	///////////////////////////////////////////////////////////////////////////
 
 	// CONFIGURACIÓN DEL MANEJO DE SEÑALES ////////////////////////////////////
@@ -281,7 +289,7 @@ void *taskTCP(void *param)
 	bzero((char *)&addrSer, sizeof(addrSer));
 	addrSer.sin_family = AF_INET;
 	addrSer.sin_port = htons(pnTCP);
-	addrSer.sin_addr.s_addr = inet_addr("127.0.0.1");
+	addrSer.sin_addr.s_addr = inet_addr(ipADDR);
 	if (addrSer.sin_addr.s_addr == INADDR_NONE)
 	{
 		perror("TCP - INVALID IP");
