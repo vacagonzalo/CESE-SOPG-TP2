@@ -12,5 +12,16 @@ typedef enum
     OUT_BLINK
 } out_state_t;
 
+/**
+ * @brief Estructura de salidas
+ *
+ */
+typedef struct
+{
+    char x : 1;
+    char y : 1;
+    char w : 1;
+    char z : 1;
+} out_t;
 
 #endif
