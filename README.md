@@ -11,3 +11,6 @@ Los scripts de *Python* fueron provistos por la cátedra y necesitan un intérpr
 * Correr el script **runInterfaceService.sh**
 * Correr el script **runSerialService.sh**
 * Correr el script **ruenServer.sh**
+
+## Licencia
+MIT
