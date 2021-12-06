@@ -112,6 +112,9 @@ const char MAX_SERIAL_INDX = 21;
 const char POS_BAUDRATE = 2;
 
 const char POS_TCPPOR = 3;
+const int MIN_TCPPOR = 0;
+const int MAX_TCPPOR = 65535;
+
 const char POS_IPADDR = 4;
 
 const char FPO = 1;
@@ -153,7 +156,7 @@ int main(int argc, char *argv[])
 	}
 
 	pnTCP = atoi(argv[POS_TCPPOR]);
-	if (pnTCP < 0)
+	if (pnTCP < MIN_TCPPOR || pnTCP > MAX_TCPPOR)
 	{
 		perror("MAI - INVALID TCP PORT\n\r");
 	}
