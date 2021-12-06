@@ -300,7 +300,7 @@ void *taskTCP(void *param)
 		printf("TCP - SOCKET created\n\r");
 	}
 
-	// Abrimos puerto con bind()
+	// Apertura de puerto
 	if (-1 == bind(s, (struct sockaddr *)&addrSer, sizeof(addrSer)))
 	{
 		close(s);
@@ -412,12 +412,13 @@ void *taskSERIAL(void *param)
 
 				pthread_mutex_lock(&mutexOuts);
 				// Suma módulo 2
-				outs[bufInp[14] - '0']++;
-				if (outs[bufInp[14] - '0'] > 2)
+				char pos = bufInp[14] - '0';
+				outs[pos]++;
+				if (outs[pos] > OUT_BLINK)
 				{
-					outs[bufInp[14] - '0'] = 0;
+					outs[pos] = OUT_OFF;
 				}
-				lines[bufInp[14] - '0'] = outs[bufInp[14] - '0'];
+				lines[pos] = outs[pos];
 				pthread_mutex_unlock(&mutexOuts);
 
 				bufOut[6] = outs[0] + '0';
