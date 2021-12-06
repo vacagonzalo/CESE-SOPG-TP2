@@ -17,26 +17,26 @@
 
 // VARIABLES DE ENTORNO ///////////////////////////////////////////////////////
 /**
- * @brief Selector del puerto serie
- *
+ * @brief Selector del puerto serie 
+ * 
  */
 int pnSerial;
 
 /**
- * @brief Velocidad de transmisión del puerto serie
- *
+ * @brief Velocidad de transmisión del puerto serie 
+ * 
  */
 int baudrate;
 
 /**
  * @brief Número de puerto TCP
- *
+ * 
  */
 int pnTCP;
 
 /**
  * @brief Dirección IP del servidor
- *
+ * 
  */
 char *ipADDR;
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,29 +44,25 @@ char *ipADDR;
 // Recursos globales //////////////////////////////////////////////////////////
 /**
  * @brief Control de cierre de la aplicación
- *
+ * 
  */
 int killme = 0;
 
 /**
- * @brief File descriptor de la conexión TCP
- *
+ * @brief File descriptor de la conexión TCP 
+ * 
  */
 int newfd = -1;
 
 /**
  * @brief Estado de los indicadores del subte
- *
+ * 
  */
-out_t lines = {
-	.x = OUT_OFF,
-	.y = OUT_OFF,
-	.w = OUT_OFF,
-	.z = OUT_OFF};
+char lines[] = {OUT_OFF, OUT_OFF, OUT_OFF, OUT_OFF};
 
 /**
  * @brief Protección de escritura para los leds de la EDU-CIAA
- *
+ * 
  */
 pthread_mutex_t mutexOuts = PTHREAD_MUTEX_INITIALIZER;
 ///////////////////////////////////////////////////////////////////////////////
@@ -74,19 +70,19 @@ pthread_mutex_t mutexOuts = PTHREAD_MUTEX_INITIALIZER;
 // FUNCIONES //////////////////////////////////////////////////////////////////
 /**
  * @brief Manejador de las señales del sistema operativo
- *
+ * 
  * Puede manejar las señales SIGINT y SIGTERM. Ambas señales pondrán a 'killme'
- * en '1', esto finaliza el proceso.
- *
+ * en '1', esto finaliza el proceso. 
+ * 
  * @param signal Identificador de la señal
  */
 void signal_handler(int signal);
 
 /**
- * @brief Función para el thread correspondiente a la comunicación TCP
- *
+ * @brief Función para el thread correspondiente a la comunicación TCP 
+ * 
  * La función se identificará en los mensajes con el prefijo 'TPC - '
- *
+ * 
  * @param param No se ingresan parámetros
  * @return void* No se regresan valores
  */
@@ -94,7 +90,7 @@ void *taskTCP(void *param);
 
 /**
  * @brief Función para el thread correspondiente a la comunicación SERIE
- *
+ * 
  * @param param No se ingresan parámetros
  * @return void* No se regresan valores
  */
@@ -103,7 +99,7 @@ void *taskSERIAL(void *param);
 
 /**
  * @brief Punto de ingreso del proceso
- *
+ * 
  * @param argc Se espera recibir el número 5
  * @param argv Se espera recibir el nombre del programa y 4 palabras
  * (variables de entorno)
@@ -361,10 +357,10 @@ void *taskTCP(void *param)
 			}
 
 			pthread_mutex_lock(&mutexOuts);
-			lines.x = buf[7] - '0';
-			lines.y = buf[8] - '0';
-			lines.w = buf[9] - '0';
-			lines.z = buf[10] - '0';
+			for (char j = 0; j < 4; ++j)
+			{
+				lines[j] = buf[7 + j] - '0';
+			}
 			pthread_mutex_unlock(&mutexOuts);
 			flag = (0 != buf[0]);
 		}
@@ -416,32 +412,12 @@ void *taskSERIAL(void *param)
 
 				pthread_mutex_lock(&mutexOuts);
 				// Suma módulo 2
-				char pos = bufInp[14] - '0';
-				outs[pos]++;
-				if (outs[pos] > 2)
+				outs[bufInp[14] - '0']++;
+				if (outs[bufInp[14] - '0'] > 2)
 				{
-					outs[pos] = OUT_OFF;
+					outs[bufInp[14] - '0'] = 0;
 				}
-
-				// Actualización de datos
-				char data = outs[pos];
-				switch (pos)
-				{
-				case 0:
-					lines.x = data;
-					break;
-				case 1:
-					lines.y = data;
-					break;
-				case 2:
-					lines.w = data;
-					break;
-				case 3:
-					lines.z = data;
-					break;
-				default:
-					break;
-				}
+				lines[bufInp[14] - '0'] = outs[bufInp[14] - '0'];
 				pthread_mutex_unlock(&mutexOuts);
 
 				bufOut[6] = outs[0] + '0';
@@ -471,35 +447,17 @@ void *taskSERIAL(void *param)
 		else
 		{
 			int cflag = 0;
-			pthread_mutex_lock(&mutexOuts);
-			if (outs[0] != lines.x)
+			for (char i = 0; i < 4; ++i)
 			{
-				cflag = 1;
-				outs[0] = lines.x;
-				bufOut[6] = outs[0] + '0';
+				pthread_mutex_lock(&mutexOuts);
+				if (outs[i] != lines[i]) // Comparo con el recurso global
+				{
+					outs[i] = lines[i];
+					bufOut[6 + i * 2] = outs[i] + '0'; // Salto las ','
+					cflag = 1;
+				}
+				pthread_mutex_unlock(&mutexOuts);
 			}
-
-			if (outs[1] != lines.y)
-			{
-				cflag = 1;
-				outs[1] = lines.y;
-				bufOut[8] = outs[1] + '0';
-			}
-
-			if (outs[2] != lines.w)
-			{
-				cflag = 1;
-				outs[2] = lines.w;
-				bufOut[10] = outs[2] + '0';
-			}
-
-			if (outs[3] != lines.z)
-			{
-				cflag = 1;
-				outs[3] = lines.z;
-				bufOut[12] = outs[3] + '0';
-			}
-			pthread_mutex_unlock(&mutexOuts);
 			if (1 == cflag)
 			{
 				serial_send(bufOut, 15);
