@@ -16,24 +16,89 @@
 #include "macros.h"
 
 // VARIABLES DE ENTORNO ///////////////////////////////////////////////////////
-
+/**
+ * @brief Selector del puerto serie 
+ * 
+ */
 int pnSerial;
-int baudrate;
-int pnTCP;
 
+/**
+ * @brief Velocidad de transmisión del puerto serie 
+ * 
+ */
+int baudrate;
+
+/**
+ * @brief Número de puerto TCP
+ * 
+ */
+int pnTCP;
 ///////////////////////////////////////////////////////////////////////////////
 
+// Recursos globales //////////////////////////////////////////////////////////
+/**
+ * @brief Control de cierre de la aplicación
+ * 
+ */
 int killme = 0;
-int newfd = -1;
-char lines[] = {OUT_OFF, OUT_OFF, OUT_OFF, OUT_OFF};
-pthread_mutex_t mutexOuts = PTHREAD_MUTEX_INITIALIZER;
 
+/**
+ * @brief File descriptor de la conexión TCP 
+ * 
+ */
+int newfd = -1;
+
+/**
+ * @brief Estado de los indicadores del subte
+ * 
+ */
+char lines[] = {OUT_OFF, OUT_OFF, OUT_OFF, OUT_OFF};
+
+/**
+ * @brief Protección de escritura para los leds de la EDU-CIAA
+ * 
+ */
+pthread_mutex_t mutexOuts = PTHREAD_MUTEX_INITIALIZER;
+///////////////////////////////////////////////////////////////////////////////
+
+// FUNCIONES //////////////////////////////////////////////////////////////////
+/**
+ * @brief Manejador de las señales del sistema operativo
+ * 
+ * Puede manejar las señales SIGINT y SIGTERM. Ambas señales pondrán a 'killme'
+ * en '1', esto finaliza el proceso. 
+ * 
+ * @param signal Identificador de la señal
+ */
 void signal_handler(int signal);
 
+/**
+ * @brief Función para el thread correspondiente a la comunicación TCP 
+ * 
+ * La función se identificará en los mensajes con el prefijo 'TPC - '
+ * 
+ * @param param No se ingresan parámetros
+ * @return void* No se regresan valores
+ */
 void *taskTCP(void *param);
 
+/**
+ * @brief Función para el thread correspondiente a la comunicación SERIE
+ * 
+ * @param param No se ingresan parámetros
+ * @return void* No se regresan valores
+ */
 void *taskSERIAL(void *param);
+///////////////////////////////////////////////////////////////////////////////
 
+/**
+ * @brief Punto de ingreso del proceso
+ * 
+ * @param argc Se espera recibir el número 5
+ * @param argv Se espera recibir el nombre del programa y 4 palabras
+ * (variables de entorno)
+ * @return int Si finalizó con normalidad o con errores
+ */
 int main(int argc, char *argv[])
 {
 	printf("MAI - START\n\r");
