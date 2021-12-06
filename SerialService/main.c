@@ -17,26 +17,26 @@
 
 // VARIABLES DE ENTORNO ///////////////////////////////////////////////////////
 /**
- * @brief Selector del puerto serie 
- * 
+ * @brief Selector del puerto serie
+ *
  */
 int pnSerial;
 
 /**
- * @brief Velocidad de transmisión del puerto serie 
- * 
+ * @brief Velocidad de transmisión del puerto serie
+ *
  */
 int baudrate;
 
 /**
  * @brief Número de puerto TCP
- * 
+ *
  */
 int pnTCP;
 
 /**
  * @brief Dirección IP del servidor
- * 
+ *
  */
 char *ipADDR;
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,25 +44,25 @@ char *ipADDR;
 // Recursos globales //////////////////////////////////////////////////////////
 /**
  * @brief Control de cierre de la aplicación
- * 
+ *
  */
 int killme = 0;
 
 /**
- * @brief File descriptor de la conexión TCP 
- * 
+ * @brief File descriptor de la conexión TCP
+ *
  */
 int newfd = -1;
 
 /**
  * @brief Estado de los indicadores del subte
- * 
+ *
  */
 char lines[] = {OUT_OFF, OUT_OFF, OUT_OFF, OUT_OFF};
 
 /**
  * @brief Protección de escritura para los leds de la EDU-CIAA
- * 
+ *
  */
 pthread_mutex_t mutexOuts = PTHREAD_MUTEX_INITIALIZER;
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,19 +70,19 @@ pthread_mutex_t mutexOuts = PTHREAD_MUTEX_INITIALIZER;
 // FUNCIONES //////////////////////////////////////////////////////////////////
 /**
  * @brief Manejador de las señales del sistema operativo
- * 
+ *
  * Puede manejar las señales SIGINT y SIGTERM. Ambas señales pondrán a 'killme'
- * en '1', esto finaliza el proceso. 
- * 
+ * en '1', esto finaliza el proceso.
+ *
  * @param signal Identificador de la señal
  */
 void signal_handler(int signal);
 
 /**
- * @brief Función para el thread correspondiente a la comunicación TCP 
- * 
+ * @brief Función para el thread correspondiente a la comunicación TCP
+ *
  * La función se identificará en los mensajes con el prefijo 'TPC - '
- * 
+ *
  * @param param No se ingresan parámetros
  * @return void* No se regresan valores
  */
@@ -90,16 +90,23 @@ void *taskTCP(void *param);
 
 /**
  * @brief Función para el thread correspondiente a la comunicación SERIE
- * 
+ *
  * @param param No se ingresan parámetros
  * @return void* No se regresan valores
  */
 void *taskSERIAL(void *param);
 ///////////////////////////////////////////////////////////////////////////////
 
+// Constantes /////////////////////////////////////////////////////////////////
+const out_t X = {.inBoard = 0, .inBuffer = 6};
+const out_t Y = {.inBoard = 1, .inBuffer = 8};
+const out_t W = {.inBoard = 2, .inBuffer = 10};
+const out_t Z = {.inBoard = 3, .inBuffer = 12};
+///////////////////////////////////////////////////////////////////////////////
+
 /**
  * @brief Punto de ingreso del proceso
- * 
+ *
  * @param argc Se espera recibir el número 5
  * @param argv Se espera recibir el nombre del programa y 4 palabras
  * (variables de entorno)
@@ -357,9 +364,9 @@ void *taskTCP(void *param)
 			}
 
 			pthread_mutex_lock(&mutexOuts);
-			for (char j = 0; j < 4; ++j)
+			for (char i = 0; i < 4; ++i)
 			{
-				lines[j] = buf[7 + j] - '0';
+				lines[i] = buf[7 + i] - '0';
 			}
 			pthread_mutex_unlock(&mutexOuts);
 			flag = (0 != buf[0]);
@@ -421,10 +428,10 @@ void *taskSERIAL(void *param)
 				lines[pos] = outs[pos];
 				pthread_mutex_unlock(&mutexOuts);
 
-				bufOut[6] = outs[0] + '0';
-				bufOut[8] = outs[1] + '0';
-				bufOut[10] = outs[2] + '0';
-				bufOut[12] = outs[3] + '0';
+				bufOut[X.inBuffer] = outs[X.inBoard] + '0';
+				bufOut[Y.inBuffer] = outs[Y.inBoard] + '0';
+				bufOut[W.inBuffer] = outs[W.inBoard] + '0';
+				bufOut[Z.inBuffer] = outs[Z.inBoard] + '0';
 				serial_send(bufOut, 15);
 				printf("SER - %s\n\r", bufOut);
 

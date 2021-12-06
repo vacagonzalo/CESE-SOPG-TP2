@@ -17,6 +17,17 @@ typedef enum
     OUT_BLINK
 } out_state_t;
 
+/**
+ * @brief 
+ * 
+ */
+typedef struct
+{
+    char inBoard;
+    char inBuffer;
+} out_t;
+
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
