@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "name": "Linux64",
+            "includePath": [
+                "${default}",
+                "${workspaceFolder}/SerialService/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "compilerArgs": ["-pthread"],
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}
